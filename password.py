@@ -45,7 +45,8 @@ def addcred() :
     print("Enter Credentials:\n")
     uname = input("Username: ")
     passw = input("Password: ")
-    url = input("URL: ")
+    url = input("URL: ") 
+    
 
     # Add to the `cred` dictionary with URL as the key
     cred[url] = {"username": uname, "password": passw}
