@@ -2,6 +2,7 @@ import secrets
 import string
 import json
 import os
+import re
 
 cred={}
 
@@ -39,25 +40,69 @@ def credman():
     else:
         print("Invalid Choice. Please try again.")
 
-def addcred() :
+
+
+# Load existing credentials from JSON file (if it exists)
+if os.path.exists("creds.json"):
+    try:
+        with open("creds.json", "r") as f:
+            content = f.read().strip()  # Read and strip whitespace
+            if content:  # Check if content is not empty
+                cred = json.loads(content)  # Load only if there is content
+            else:
+                print("Warning: creds.json is empty. Starting with empty credentials.")
+    except json.JSONDecodeError:
+        print("Error: creds.json is corrupted or contains invalid JSON. Starting with empty credentials.")
+        cred = {}
+else:
+    print("creds.json not found. Starting with empty credentials.")
     
+    
+def addcred():
     
     print("Enter Credentials:\n")
+    
+    # Validate URL
+    
+    url_regex = r'^(https?://)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$'  # Basic URL regex
+    while True:
+        url = input("URL: ")
+        if re.match(url_regex, url):
+            break
+        else:
+            print("Invalid URL format. Please enter a valid URL (e.g., http://example.com).")
+
     uname = input("Username: ")
-    passw = input("Password: ")
-    url = input("URL: ") 
     
-
-    # Add to the `cred` dictionary with URL as the key
-    cred[url] = {"username": uname, "password": passw}
-
-    # Save `cred` to a JSON file for persistence
-    with open("creds.json", "w") as f:
-        json.dump(cred, f)
+    # Validate Password
     
-    print(f"Credentials for {url} added successfully!")
+    while True:
+        passw = input("Password: ")
+        if len(passw) >= 8:
+            break
+        else:
+            print("Password must be at least 8 characters long. Please try again.")
 
+    # Check if the URL already exists in the credentials
+    
+    if url not in cred:
+        cred[url] = {}  # Create a new entry if it doesn't exist
+        
 
+    # Check for existing username
+    if uname in cred[url]:
+        print(f"Username '{uname}' already exists for {url}. Please use a different username.")
+    else:
+        cred[url][uname] = passw  # Add the new username and password
+
+        # Save to the JSON file
+        
+        with open("creds.json", "w") as f:
+            json.dump(cred, f)
+
+        print(f"Credentials for {uname} added successfully for {url}!")
+
+   
 
 def viewcred():
     print("View Credentials functionality not yet implemented.")
